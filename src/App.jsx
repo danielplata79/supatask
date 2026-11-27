@@ -1,16 +1,22 @@
 import { useEffect, useState } from 'react';
-
-import { registerUser, loginUser, logoutUser, } from './services/auth.js'
-
 import { supabase } from './services/supabase.js';
+import { registerUser, loginUser, logoutUser, } from './services/auth.js'
+import { createTasks, getTasks, updateTasks, deleteTasks } from './services/tasks.js'
 
 function App() {
   const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [isRegistering, setIsRegistering] = useState(false);
+
+  const [tasks, setTasks] = useState(false);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [priority, setPriority] = useState('medium');
+
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
