@@ -47,9 +47,9 @@ function Register() {
         {message && <p role="alert">{message}</p>}
 
         <p>Already have an account?{" "}<Link to="/login">Login</Link></p>
-
       </main>
-    )
+    );
   }
-
 }
+
+export default Register;
