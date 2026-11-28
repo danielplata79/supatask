@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 
-export async function createTask(title, description, priority) {
+export async function createTasks(title, description, priority) {
     const { data, error } = await supabase
         .from('tasks')
         .insert({
