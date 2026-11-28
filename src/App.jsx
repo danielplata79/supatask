@@ -1,116 +1,41 @@
-import { useEffect, useState } from 'react';
-import { supabase } from './services/supabase.js';
-import { registerUser, loginUser, logoutUser, } from './services/auth.js'
-import { createTasks, getTasks, updateTasks, deleteTasks } from './services/tasks.js'
+import {
+  Routes,
+  Route,
+  Navigate
+} from 'react-router';
+
+import { useAuth } from './components/AuthContext';
+
+import Login from './components/Login';
+import Register from './components/Register';
+import Dashboard from './components/Dashboard';
 
 function App() {
-  const [user, setUser] = useState(null);
-  const [authLoading, setAuthLoading] = useState(true);
+  const { user, loading } = useAuth();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const [isRegistering, setIsRegistering] = useState(false);
-
-  const [tasks, setTasks] = useState(false);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [priority, setPriority] = useState('medium');
-
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  // Listen for authentication changes
-  useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    }
-    );
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  // Handle registration and login
-  async function handleSubmit(e) {
-    e.preventDefault();
-
-    setLoading(true);
-    setMessage("");
-
-    try {
-      if (isRegistering) {
-        const data = await registerUser(email, password);
-        if (!data.session) {
-          setMessage("Check your email to confirm your account!");
-        } else {
-          setMessage("Registration succesfull!");
-        }
-      } else {
-        await loginUser(email, password);
-        setMessage("Login succesfull");
-      }
-    } catch (error) {
-      setMessage(error.message);
-    } finally {
-      setLoading(false);
-    }
+  if (loading) {
+    return <p>Checking Authentication...</p>;
   }
 
-  // Handle logout
-  async function handleLogout() {
-    try {
-      await logoutUser();
-      setMessage("Loged out succesfully");
-    } catch (error) {
-      setMessage(error.message);
-    }
-  }
-
-  // Authenticated user view
-  if (user) {
-    return (
-      <main>
-        <h1>Task Manager</h1>
-        <h2>Welcome!</h2>
-        <p>Logged in as: {user.email}</p>
-        <button onClick={handleLogout}>Logout</button>
-        <p>{message}</p>
-      </main>
-    );
-  }
-
-  // Authentication form
   return (
-    <main>
-      <h1>Task Manager</h1>
-      <h2>{isRegistering ? "Create Account" : "Login"}</h2>
+    <Routes>
+      <Route path='/' element={<Navigate to={user ? '/dashboard' : '/login'} replace />} />
 
+      <Route path='/login' element={
+        user ? <Navigate to='/dashboard' replace /> : <Login />
+      } />
 
-      <form onSubmit={handleSubmit}>
-        <input type='email' placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} required />
-        <input type='password' placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
-        <button type='submit' disabled={loading}>
-          {loading
-            ? "Please wait.."
-            : isRegistering ? "Register" : "Login"
-          }
-        </button>
-      </form>
+      <Route path='./register' element={
+        user ? <Navigate to='/dashboard' replace /> : <Register />
+      } />
 
-      <button onClick={() => {
-        setIsRegistering(!isRegistering);
-        setMessage("");
-      }}
-      >
-        {isRegistering
-          ? "Already have an account? Login"
-          : "Create an Account"
-        }
-      </button>
-      <p>{message}</p>
-    </main>
+      <Route path="/dashboard" element={
+        user ? <Dashboard /> : <Navigate to="/login" replace />
+      } />
+
+      <Route path="*" element={<Navigate to="/" replace />} />
+
+    </Routes>
   )
 }
 

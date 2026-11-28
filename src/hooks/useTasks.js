@@ -98,5 +98,5 @@ export function useTasks(userId) {
     addTask,
     toggleTasks,
     removeTasks
-  }
+  };
 }
